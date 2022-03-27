@@ -21,7 +21,7 @@ class UUIDMixin(models.Model):
 
 
 class Genre(UUIDMixin, TimeStampedMixin):
-    name = models.CharField(_('name'), max_length=255)
+    name = models.CharField(_('name'), max_length=255, db_index=True)
     description = models.TextField(_('description'), blank=True)
 
     def __str__(self):
@@ -36,7 +36,7 @@ class Genre(UUIDMixin, TimeStampedMixin):
 class Filmwork(UUIDMixin, TimeStampedMixin):
     title = models.CharField(_('name'), max_length=255)
     description = models.TextField(_('description'), blank=True)
-    creation_date = models.DateField(_('creation'))
+    creation_date = models.DateField(_('creation'), db_index=True)
     rating = models.FloatField(_('rating'), blank=True,
                                validators=[MinValueValidator(0),
                                            MaxValueValidator(100)])
@@ -63,7 +63,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
 
 
 class Person(UUIDMixin, TimeStampedMixin):
-    full_name = models.CharField(_('name'), max_length=255)
+    full_name = models.CharField(_('name'), max_length=255, db_index=True)
 
     def __str__(self):
         return self.full_name
@@ -81,6 +81,7 @@ class GenreFilmwork(UUIDMixin):
 
     class Meta:
         db_table = "content\".\"genre_film_work"
+        unique_together = (('film_work', 'genre'),)
 
 
 class PersonFilmWork(UUIDMixin):
@@ -91,6 +92,7 @@ class PersonFilmWork(UUIDMixin):
 
     class Meta:
         db_table = "content\".\"person_film_work"
+        unique_together = (('film_work', 'person'),)
 
 
 
