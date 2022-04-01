@@ -20,8 +20,6 @@ CREATE TABLE IF NOT EXISTS content.person (
     modified timestamp with time zone
 );
 
-CREATE INDEX person_full_name_idx ON content.person(full_name); 
-
 CREATE TABLE IF NOT EXISTS content.person_film_work (
     id uuid PRIMARY KEY,
     film_work_id uuid NOT NULL,
