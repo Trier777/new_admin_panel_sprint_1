@@ -113,11 +113,9 @@ class PostgresSaver:
             print("The error {} write occurred".format(e))
 
     def save_all_data(self, data):
-        self.save_table("film_work", data["filmwork"])
-        self.save_table("person", data["person"])
-        self.save_table("genre", data["genre"])
-        self.save_table("genre_film_work", data["genre_film_work"])
-        self.save_table("person_film_work", data["person_film_work"])
+        for k in data.keys():
+            self.save_table(k, data[k])
+
 
     def save_person_to_postgres(self, person: Person):
         cursor = self.pg_conn.cursor()
