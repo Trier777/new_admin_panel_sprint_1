@@ -73,16 +73,11 @@ class SQLiteLoader:
 
     def load_movies(self):
         tables_dict = {}
-        data_person = self.load_table("person")
-        data_filmwork = self.load_table("film_work")
-        data_genre = self.load_table("genre")
-        data_genre_film_work = self.load_table("genre_film_work")
-        data_person_film_work = self.load_table("person_film_work")
-        tables_dict["person"] = data_person
-        tables_dict["filmwork"] = data_filmwork
-        tables_dict["genre"] = data_genre
-        tables_dict["genre_film_work"] = data_genre_film_work
-        tables_dict["person_film_work"] = data_person_film_work
+        tables_dict["person"] = self.load_table("person")
+        tables_dict["filmwork"] = self.load_table("film_work")
+        tables_dict["genre"] = self.load_table("genre")
+        tables_dict["genre_film_work"] = self.load_table("genre_film_work")
+        tables_dict["person_film_work"] = self.load_table("person_film_work")
         return tables_dict
 
     def load_table(self, tablename) -> list:
