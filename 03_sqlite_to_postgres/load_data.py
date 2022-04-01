@@ -1,23 +1,10 @@
 import datetime
 import sqlite3
 import psycopg2 as psycopg2
-from dotenv import load_dotenv
-from os import path
-import os
 import uuid
 from dataclasses import dataclass
-
 from psycopg2.extras import DictCursor
-
-load_dotenv()
-
-DB_PATH = os.environ.get('DB_PATH')
-DB_NAME = os.environ.get('DB_NAME')
-DB_USER = os.environ.get('DB_USER')
-DB_PASSWORD = os.environ.get('DB_PASSWORD')
-DB_HOST = os.environ.get('DB_HOST')
-DB_PORT = os.environ.get('DB_PORT')
-UPLOAD_PORTION = os.environ.get('UPLOAD_PORTION')
+import constants
 
 
 @dataclass
@@ -117,7 +104,6 @@ class PostgresSaver:
         for k in data.keys():
             self.save_table(k, data[k])
 
-
     def save_person_to_postgres(self, person: Person):
         cursor = self.pg_conn.cursor()
         query_write = 'INSERT INTO content.person (id, full_name, created, modified) VALUES (%s, %s, %s, %s)' \
@@ -171,7 +157,7 @@ class PostgresSaver:
         elif name == "film_work":
             for row in table_list:
                 film_work = Filmwork(id=row['id'], title=row['title'], description=row['description'],
-                                     creation_date=row['creation_date'],rating=row['rating'],
+                                     creation_date=row['creation_date'], rating=row['rating'],
                                      type=row['type'], created=row['created_at'], modified=row['updated_at'])
                 self.save_film_work_to_postgres(film_work)
         elif name == "genre":
@@ -199,17 +185,9 @@ def load_from_sqlite(connection: sqlite3.Connection, pg_conn: psycopg2.extension
     postgres_saver.save_all_data(data)
 
 
-def get_script_dir() -> str:
-    abs_path = path.abspath(__file__)  # полный путь к файлу скрипта
-    return path.dirname(abs_path)
-
-
-DB_FILE = get_script_dir() + path.sep + DB_PATH
-
-
 def check_table_row_quantity(table_name: str) -> bool:
-    dsl = {'dbname': DB_NAME, 'user': DB_USER, 'password': DB_PASSWORD, 'host': DB_HOST, 'port': DB_PORT}
-    with sqlite3.connect(DB_FILE) as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
+    with sqlite3.connect(constants.DB_FILE) as sqlite_conn, psycopg2.connect(**constants.DSL,
+                                                                             cursor_factory=DictCursor) as pg_conn:
         query_sqlite = "SELECT count(*) FROM {table};".format(table=table_name)
         cursor_sqlite = sqlite_conn.cursor()
         cursor_sqlite.execute(query_sqlite)
@@ -286,8 +264,8 @@ def check_equal_table(table_name: str, pg_quantity_row: list, sqlite_quantity_ro
 
 
 def check_table_row(table_name: str) -> bool:
-    dsl = {'dbname': DB_NAME, 'user': DB_USER, 'password': DB_PASSWORD, 'host': DB_HOST, 'port': DB_PORT}
-    with sqlite3.connect(DB_FILE) as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
+    with sqlite3.connect(constants.DB_FILE) as sqlite_conn,\
+            psycopg2.connect(**constants.DSL, cursor_factory=DictCursor) as pg_conn:
         query_sqlite = "SELECT * FROM {table};".format(table=table_name)
         cursor_sqlite = sqlite_conn.cursor()
         cursor_sqlite.execute(query_sqlite)
@@ -302,6 +280,6 @@ def check_table_row(table_name: str) -> bool:
 
 
 if __name__ == '__main__':
-    dsl = {'dbname': DB_NAME, 'user': DB_USER, 'password': DB_PASSWORD, 'host': DB_HOST, 'port': DB_PORT}
-    with sqlite3.connect(DB_FILE) as sqlite_conn, psycopg2.connect(**dsl, cursor_factory=DictCursor) as pg_conn:
+    with sqlite3.connect(constants.DB_FILE) as sqlite_conn,\
+            psycopg2.connect(**constants.DSL, cursor_factory=DictCursor) as pg_conn:
         load_from_sqlite(sqlite_conn, pg_conn)
