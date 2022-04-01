@@ -74,7 +74,7 @@ class SQLiteLoader:
     def load_movies(self):
         tables_dict = {}
         tables_dict["person"] = self.load_table("person")
-        tables_dict["filmwork"] = self.load_table("film_work")
+        tables_dict["film_work"] = self.load_table("film_work")
         tables_dict["genre"] = self.load_table("genre")
         tables_dict["genre_film_work"] = self.load_table("genre_film_work")
         tables_dict["person_film_work"] = self.load_table("person_film_work")
@@ -90,6 +90,7 @@ class SQLiteLoader:
 
     @staticmethod
     def execute_read_query(connection: sqlite3.Connection, query: str) -> list or bool:
+        connection.row_factory = sqlite3.Row
         cursor = connection.cursor()
         try:
             cursor.execute(query)
@@ -164,26 +165,30 @@ class PostgresSaver:
     def save_table(self, name: str, table_list: list):
         if name == "person":
             for row in table_list:
-                person = Person(full_name=row[1], id=row[0],
-                                created=row[2], modified=row[3])
+                person = Person(full_name=row['full_name'], id=row['id'],
+                                created=row['created_at'], modified=row['updated_at'])
                 self.save_person_to_postgres(person)
         elif name == "film_work":
             for row in table_list:
-                film_work = Filmwork(id=row[0], title=row[1], description=row[2], creation_date=row[3],
-                                     rating=row[5], type=row[6], created=row[7], modified=row[8])
+                film_work = Filmwork(id=row['id'], title=row['title'], description=row['description'],
+                                     creation_date=row['creation_date'],rating=row['rating'],
+                                     type=row['type'], created=row['created_at'], modified=row['updated_at'])
                 self.save_film_work_to_postgres(film_work)
         elif name == "genre":
             for row in table_list:
-                genre = Genre(id=row[0], name=row[1], description=row[2], created=row[3], modified=row[4])
+                genre = Genre(id=row['id'], name=row['name'], description=row['description'],
+                              created=row['created_at'], modified=row['updated_at'])
                 self.save_genre_to_postgres(genre)
         elif name == "genre_film_work":
             for row in table_list:
-                genre_film_work = GenreFilmwork(id=row[0], film_work_id=row[1], genre_id=row[2], created=row[3])
+                genre_film_work = GenreFilmwork(id=row['id'], film_work_id=row['film_work_id'],
+                                                genre_id=row['genre_id'], created=row['created_at'])
                 self.save_genre_film_work_to_postgres(genre_film_work)
         elif name == "person_film_work":
             for row in table_list:
-                person_film_work = PersonFilmwork(id=row[0], film_work_id=row[1], person_id=row[2],
-                                                  role=row[3], created=row[4])
+                person_film_work = PersonFilmwork(id=row['id'], film_work_id=row['film_work_id'],
+                                                  person_id=row['person_id'], role=row['role'],
+                                                  created=row['created_at'])
                 self.save_person_film_work_to_postgres(person_film_work)
 
 
