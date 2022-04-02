@@ -9,6 +9,11 @@ class GenreFilmworkInline(admin.TabularInline):
 class PersonFilmWorkInline(admin.TabularInline):
     model = PersonFilmWork
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.prefetch_related('person')
+
+
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = ('name', 'description',)
@@ -25,10 +30,5 @@ class PersonAdmin(admin.ModelAdmin):
 class FilmworkAdmin(admin.ModelAdmin):
     inlines = (GenreFilmworkInline, PersonFilmWorkInline,)
     list_display = ('title', 'type', 'creation_date', 'rating',)
-    list_filter = ('type','rating',)
+    list_filter = ('type', 'rating',)
     search_fields = ('title', 'description', 'id')
-
-
-
-
-
