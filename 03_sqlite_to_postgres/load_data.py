@@ -8,6 +8,7 @@ import constants
 import logging
 import logging.config
 import json
+from contextlib import contextmanager
 
 with open(constants.LOG_FILE, 'r') as logging_config_file:
     config_dict = json.load(logging_config_file)
@@ -85,9 +86,7 @@ class SQLiteLoader:
             return []
 
     @staticmethod
-    def execute_read_query(connection: sqlite3.Connection, query: str) -> list or bool:
-        connection.row_factory = sqlite3.Row
-        cursor = connection.cursor()
+    def execute_read_query(cursor: sqlite3.Cursor, query: str) -> list or bool:
         try:
             cursor.execute(query)
             return cursor.fetchall()
@@ -104,9 +103,10 @@ class PostgresSaver:
 
     def save_row(self, cursor: DictCursor, query_write: str, values: tuple):
         try:
-            cursor.execute(query_write, values)
-            self.pg_conn.commit()
-            logger.info('Success!')
+            with cursor as curs:
+                curs.execute(query_write, values)
+                self.pg_conn.commit()
+                logger.info('Success!')
         except Exception as e:
             error_text = "The error {} write occurred".format(e)
             logger.error(error_text)
@@ -290,7 +290,20 @@ def check_table_row(table_name: str) -> bool:
         return check_equal_table(table_name, pg_quantity_row, sqlite_quantity_row)
 
 
+@contextmanager
+def open_db(file_name: str):
+    conn = sqlite3.connect(file_name)
+    conn.row_factory = sqlite3.Row
+    try:
+        logging.info("Creating connection")
+        yield conn.cursor()
+    finally:
+        logging.info("Closing connection")
+        conn.commit()
+        conn.close()
+
+
 if __name__ == '__main__':
-    with sqlite3.connect(constants.DB_FILE) as sqlite_conn,\
+    with open_db(constants.DB_FILE) as sqlite_conn,\
             psycopg2.connect(**constants.DSL, cursor_factory=DictCursor) as pg_conn:
         load_from_sqlite(sqlite_conn, pg_conn)
