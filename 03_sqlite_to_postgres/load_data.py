@@ -5,6 +5,15 @@ import uuid
 from dataclasses import dataclass
 from psycopg2.extras import DictCursor
 import constants
+import logging
+import logging.config
+import json
+
+with open(constants.LOG_FILE, 'r') as logging_config_file:
+    config_dict = json.load(logging_config_file)
+
+logging.config.dictConfig(config_dict)
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -83,7 +92,8 @@ class SQLiteLoader:
             cursor.execute(query)
             return cursor.fetchall()
         except Exception as e:
-            print("The error {} read occurred".format(e))
+            error_text = "The error {} write occurred".format(e)
+            logger.error(error_text)
             return False
 
 
@@ -96,9 +106,10 @@ class PostgresSaver:
         try:
             cursor.execute(query_write, values)
             self.pg_conn.commit()
-            print("Success!")
+            logger.info('Success!')
         except Exception as e:
-            print("The error {} write occurred".format(e))
+            error_text = "The error {} write occurred".format(e)
+            logger.error(error_text)
 
     def save_all_data(self, data):
         for k in data.keys():
