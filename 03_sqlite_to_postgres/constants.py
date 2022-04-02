@@ -22,6 +22,8 @@ def get_script_dir() -> str:
     abs_path = path.abspath(__file__)  # полный путь к файлу скрипта
     return path.dirname(abs_path)
 
-LOG_FILE = get_script_dir() + path.sep+ LOGGING_PATH
+
+LOG_FILE = get_script_dir() + path.sep + LOGGING_PATH
+
 
 DB_FILE = get_script_dir() + path.sep + DB_PATH

@@ -1,7 +1,7 @@
 """Модуль тестирования."""
 import pytest
 
-from load_data import check_table_row, check_table_row_quantity
+from checker import check_table_row, check_table_row_quantity
 
 
 @pytest.mark.parametrize('table_name', ["genre", "film_work", "person",
